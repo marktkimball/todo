@@ -64,15 +64,6 @@ li{
   border-bottom: 1px solid $borderColor;
 }
 
-.todoList checkbox{
-  width: auto;
-  display:none;
-}
-
-input.checkbox {
-  width: 20px;
-}
-
 .editData{
   display:none;
   li{
@@ -105,6 +96,10 @@ input.checkbox {
 
 .right{
   float: right;
+}
+
+.todoList .fa{
+  margin: 0 10px 0 20px;
 }
 
 .activeElement{

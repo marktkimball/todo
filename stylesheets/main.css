@@ -85,6 +85,9 @@ input.checkbox {
 .right {
   float: right; }
 
+.todoList .fa {
+  margin: 0 10px 0 20px; }
+
 .activeElement {
   display: block; }
 
