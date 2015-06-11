@@ -17,58 +17,14 @@ var page ={
   },
 
   initEvents: function(arguments){
-    $('.toggleViews').on('click', 'a', page.toggleViewFunc(event));
+    $('.toggleViews').on('click', 'a', page.toggleViewFunc);
     // $('.bottomMenu').on('click', '.right', page.deleteMultiCompleted);
-    $('.mainContent').on('click', 'a', page.deleteItem);
-    $('.mainContent').on('click', '.checkbox', function(event){
-      $(this).parent().toggleClass('strikeThrough');
-      $.ajax({
-        url: page.url,
-        method: 'GET',
-        success: function (data) {
-          console.log("Loaded checkbox data");
-          var itemId = $(this).closest('li').data('id');
-          if(data.completed === "true"){
-            var updatedItem = {
-              itemText: data.itemText,
-              completed: false
-            };
-          }else{
-            var updatedItem = {
-              itemText: data.itemText,
-              completed: true
-            };
-          }
-          console.log(data);
-          // page.updateItem(updatedItem, itemId);
-        },
-        error: function (err) {
-          console.log("Error: ", err)
-        }
-      })
-    });
-    $('.mainContent').on('keypress', '.inputArea', function(event){
-      if(event.keyCode === 13){
-      event.preventDefault();
-      page.addItem($('input[name="todoItem"]').val());
-    }});
-    $('.mainContent').on('dblclick', 'li', function(event){
-      event.preventDefault();
-      $(this).toggleClass('activeElement');
-      $(this).next().toggleClass('activeElement');
-    });
-    $('.mainContent').on('keypress', '.editArea', function (event) {
-      if(event.keyCode === 13){
-      event.preventDefault();
-      var itemId = $(this).closest('li').data('id');
-      var updatedItem = {
-        itemText: $(this).closest('input[name="editTodoItem"]').val()
-      };
-      $(this).parent().toggleClass('activeElement');
-      $(this).parent().prev().toggleClass('activeElement');
-      page.updateItem(updatedItem, itemId);
-    };
-  })
+    $('.todoList').on('click', 'a', page.deleteItem);
+    $('.mainContent').on('click', '.checkbox', page.clickCheckBox);
+    $('.mainContent').on('keypress', '.inputArea', page.enterPress);
+    $('.mainContent').on('dblclick', 'li', page.doubleClick);
+    $('.mainContent').on('keypress', '.editArea', page.editEnter);
+    $('.bottomMenu').on('click', '.right', page.clearCompleted);
 },
 
   itemCount: $('.todoList').children('li').length/2 - $('.strikeThrough').length,
@@ -106,7 +62,7 @@ var page ={
   addItem: function (input) {
     var newItem = {
         itemText: input,
-        completed: false
+        completed: true
         }
     page.createItem(newItem);
 
@@ -180,17 +136,92 @@ var page ={
 
   toggleViewFunc: function(event){
     event.preventDefault();
-    var $filePath = $('.todoList').children().not('.editData');
     if($(this).text() === "All"){
-      $filePath.addClass('activeElement');
+      $('.todoList').children().not('.editData').addClass('activeElement');
+    }else if($(this).text() === "Active"){
+      $('.todoList').children().not('.editData').not('.strikeThrough').addClass('activeElement');
+      $('.todoList').children().not('.editData').siblings('.strikeThrough').removeClass('activeElement');
+    }else{
+      $('.todoList').children().not('.editData').not('.strikeThrough').removeClass('activeElement');
+      $('.todoList').children().not('.editData').siblings('.strikeThrough').addClass('activeElement');
     }
-    // }else if($('a').text === "Completed"){
-    //   $filePath.$('.strikeThrough').addClass('activeElement');
-    //   $filePath.not('.strikeThrough').removeClass('activeElement');
-    // }else{
-    //   $filePath.not('.strikeThrough').addClass('activeElement');
-    //   $filePath.$('.strikeThrough').removeClass('activeElement');
-    // }
-  }
+  },
+
+  clickCheckBox: function(event){
+    $(this).parent().toggleClass('strikeThrough');
+    $.ajax({
+      url: page.url,
+      method: 'GET',
+      success: function (data) {
+        console.log("Loaded checkbox data");
+        var itemId = $(this).closest('li').data('id');
+        if(data.completed === "true"){
+          var updatedItem = {
+            itemText: data.itemText,
+            completed: false
+          };
+        }else{
+          var updatedItem = {
+            itemText: data.itemText,
+            completed: true
+          };
+        }
+        console.log(data);
+        // page.updateItem(updatedItem, itemId);
+      },
+      error: function (err) {
+        console.log("Error: ", err)
+      }
+    })
+  },
+
+  enterPress: function(event){
+    if(event.keyCode === 13){
+    event.preventDefault();
+    page.addItem($('input[name="todoItem"]').val());
+    }
+  },
+
+  doubleClick: function(event){
+    event.preventDefault();
+    $(this).toggleClass('activeElement');
+    $(this).next().toggleClass('activeElement');
+  },
+
+  editEnter: function (event) {
+    if(event.keyCode === 13){
+    event.preventDefault();
+    var itemId = $(this).closest('li').data('id');
+    var updatedItem = {
+      itemText: $(this).closest('input[name="editTodoItem"]').val()
+    };
+    $(this).parent().toggleClass('activeElement');
+    $(this).parent().prev().toggleClass('activeElement');
+    page.updateItem(updatedItem, itemId);
+  };
+},
+
+clearCompleted: function(event){
+  event.preventDefault();
+  var myArray = $('.todoList').find('.strikeThrough');
+  $('.todoList').find('.strikeThrough').removeClass('activeElement');
+  var mappedIds = _.map(myArray, function(el){
+    return{
+      id: el.dataset.id
+    }
+  });
+  _.each(mappedIds, function(el){
+    $.ajax({
+      url: page.url + "/" +el.id,
+      method: 'DELETE',
+      success: function(data){
+
+      }
+
+    });
+  });
+  $('.todoList').html('');
+  page.loadItems();
+}
 
 };
