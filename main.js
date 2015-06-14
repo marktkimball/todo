@@ -1,3 +1,5 @@
+var itemCount = 0;
+
 $(document).ready(function(){
 
   page.init();
@@ -13,7 +15,7 @@ var page ={
 
   initStyling: function(arguments){
     page.loadItems();
-    page.prependTemplate('itemCount', page.itemCount, $('.bottomMenu'));
+
   },
 
   initEvents: function(arguments){
@@ -26,7 +28,7 @@ var page ={
     $('.bottomMenu').on('click', '.right', page.clearCompleted);
 },
 
-  itemCount: $('.todoList').children('li').length/2 - $('.strikeThrough').length,
+  // itemCount: $('.todoList').find('.strikeThrough').length,
 
   url: "http://tiy-fee-rest.herokuapp.com/collections/markkimball",
 
@@ -37,6 +39,9 @@ var page ={
       success: function (data) {
         console.log("Successfully loaded data");
         page.addAllPostsToList(data);
+        itemCount = $('.todoList').children().length/2 - $('.todoList').find('.strikeThrough').length;
+        console.log(itemCount);
+        page.prependTemplate('itemCount', {itemCount : itemCount}, $('.bottomMenu'))
       },
       error: function (err) {
         console.log("Error: ", err)
@@ -109,6 +114,7 @@ var page ={
   },
 
   prependTemplate: function(tmplName, data, $target){
+    $('.left').empty();
     var compiledTmpl = _.template(page.getTemplate(tmplName));
     $target.prepend(compiledTmpl(data));
   },

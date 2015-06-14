@@ -13,5 +13,5 @@ templates.newItem = [
 ].join("");
 
 templates.itemCount = [
-  "<span class='left'><%= page.itemCount %> items left</span>"
+  "<span class='left'><%= itemCount %> items left</span>"
 ].join("");
